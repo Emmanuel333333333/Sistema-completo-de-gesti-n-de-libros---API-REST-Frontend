@@ -1,3 +1,17 @@
+## 👤 Autor
+
+**[Emmanuel Galeano Martinez]**
+
+- GitHub: [@Emmanuel33](https://github.com/Emmanuel333333333)
+- Email: emmanuelgaleano43@gmail.com
+
+## 🙏 Agradecimientos
+
+- FastAPI por el excelente framework
+- Material-UI por los componentes
+- La comunidad de React
+- [SofkaTechnologies] por la oportunidad de realizar esta prueba técnica
+
 # 📚 Sistema de Gestión de Libros
 
 > API RESTful desarrollada con FastAPI (Python) y frontend con React + Material-UI
@@ -263,20 +277,4 @@ npm run build
 - [ ] Upload de imágenes de portadas
 - [ ] Sistema de categorías y etiquetas
 
-## 👤 Autor
-
-**[Emmanuel Galeano Martinez]**
-
-- GitHub: [@Emmanuel33](https://github.com/Emmanuel333333333)
-- Email: emmanuelgaleano43@gmail.com
-
-## 🙏 Agradecimientos
-
-- FastAPI por el excelente framework
-- Material-UI por los componentes
-- La comunidad de React
-- [SofkaTechnologies] por la oportunidad de realizar esta prueba técnica
-
 ---
-
-📺 [Ver video explicativo completo](#)
