@@ -173,17 +173,6 @@ curl -X PUT "http://localhost:8000/books/1" \
 curl -X DELETE http://localhost:8000/books/1
 ```
 
-## 🎨 Capturas de Pantalla
-
-### Interfaz Principal
-![Interfaz principal](screenshots/main.png)
-
-### Crear/Editar Libro
-![Formulario](screenshots/form.png)
-
-### Documentación API (Swagger)
-![Swagger UI](screenshots/swagger.png)
-
 ## 🏗️ Arquitectura
 
 ### Backend
