@@ -10,7 +10,7 @@
 - FastAPI por el excelente framework
 - Material-UI por los componentes
 - La comunidad de React
-- [SofkaTechnologies] por la oportunidad de realizar esta prueba técnica
+- [SofkaTechnologies] por la oportunidad de realizar esta prueba de conocimiento
 
 # 📚 Sistema de Gestión de Libros
 
