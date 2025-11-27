@@ -20,17 +20,32 @@ import {
   TextField,
   Alert,
   Snackbar,
-  CircularProgress
+  CircularProgress,
+  Chip,
+  Fade,
+  Slide,
+  AppBar,
+  Toolbar,
+  Card,
+  CardContent,
+  Divider,
+  Tooltip
 } from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility as VisibilityIcon
+  Visibility as VisibilityIcon,
+  MenuBook as BookIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 function App() {
   const [books, setBooks] = useState([]);
@@ -62,7 +77,7 @@ function App() {
       const response = await axios.get(`${API_URL}/books`);
       setBooks(response.data);
     } catch (_error) {
-      console.error('view details error:', _error);
+      console.error('Error al cargar libros:', _error);
       showSnackbar('Error al cargar los libros', 'error');
     } finally {
       setLoading(false);
@@ -120,10 +135,10 @@ function App() {
     try {
       if (currentBook) {
         await axios.put(`${API_URL}/books/${currentBook.id}`, bookData);
-        showSnackbar('Libro actualizado exitosamente');
+        showSnackbar('Libro actualizado exitosamente', 'success');
       } else {
         await axios.post(`${API_URL}/books`, bookData);
-        showSnackbar('Libro creado exitosamente');
+        showSnackbar('Libro creado exitosamente', 'success');
       }
       fetchBooks();
       handleCloseDialog();
@@ -148,11 +163,11 @@ function App() {
   const handleDelete = async () => {
     try {
       await axios.delete(`${API_URL}/books/${selectedBook.id}`);
-      showSnackbar('Libro eliminado exitosamente');
+      showSnackbar('Libro eliminado exitosamente', 'success');
       fetchBooks();
       handleCloseDeleteDialog();
     } catch (_error) {
-      console.error('view details error:', _error);
+      console.error('Error al eliminar:', _error);
       showSnackbar('Error al eliminar el libro', 'error');
     }
   };
@@ -163,7 +178,7 @@ function App() {
       setSelectedBook(response.data);
       setOpenDetailsDialog(true);
     } catch (_error) {
-      console.error('view details error:', _error);
+      console.error('Error al ver detalles:', _error);
       showSnackbar('Error al cargar los detalles', 'error');
     }
   };
@@ -174,105 +189,305 @@ function App() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Gestión de Libros
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
-          Nuevo Libro
-        </Button>
-      </Box>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      pb: 4
+    }}>
+      {/* Header */}
+      <AppBar 
+        position="static" 
+        elevation={0}
+        sx={{ 
+          background: 'transparent',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)'
+        }}
+      >
+        <Toolbar>
+          <BookIcon sx={{ mr: 2, fontSize: 32, color: 'white' }} />
+          <Typography 
+            variant="h5" 
+            component="h1" 
+            sx={{ 
+              flexGrow: 1,
+              fontWeight: 700,
+              color: 'white',
+              letterSpacing: 1
+            }}
+          >
+            Biblioteca Digital
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog()}
+            sx={{
+              bgcolor: 'white',
+              color: '#667eea',
+              fontWeight: 600,
+              px: 3,
+              borderRadius: 2,
+              textTransform: 'none',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.9)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Nuevo Libro
+          </Button>
+        </Toolbar>
+      </AppBar>
 
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Título</TableCell>
-                <TableCell>Autor</TableCell>
-                <TableCell>Año</TableCell>
-                <TableCell>Género</TableCell>
-                <TableCell align="center">Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {books.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No hay libros registrados
-                  </TableCell>
-                </TableRow>
-              ) : (
-                books.map((book) => (
-                  <TableRow key={book.id} hover>
-                    <TableCell>{book.id}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => handleViewDetails(book.id)}
-                        sx={{ textTransform: 'none', textAlign: 'left' }}
-                      >
-                        {book.title}
-                      </Button>
-                    </TableCell>
-                    <TableCell>{book.author}</TableCell>
-                    <TableCell>{book.year || '-'}</TableCell>
-                    <TableCell>{book.genre || '-'}</TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        color="info"
-                        onClick={() => handleViewDetails(book.id)}
-                        title="Ver detalles"
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenDialog(book)}
-                        title="Editar"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => handleOpenDeleteDialog(book)}
-                        title="Eliminar"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        {/* Stats Card */}
+        <Fade in timeout={800}>
+          <Card 
+            sx={{ 
+              mb: 3,
+              borderRadius: 3,
+              background: 'rgba(255,255,255,0.95)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <BookIcon sx={{ fontSize: 40, color: '#667eea' }} />
+                <Box>
+                  <Typography variant="h4" fontWeight={700} color="#667eea">
+                    {books.length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Libros en la colección
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Fade>
+
+        {/* Table Container */}
+        {loading ? (
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              minHeight: 400,
+              background: 'rgba(255,255,255,0.95)',
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <CircularProgress size={60} thickness={4} sx={{ color: '#667eea' }} />
+          </Box>
+        ) : (
+          <Fade in timeout={1000}>
+            <TableContainer 
+              component={Paper} 
+              sx={{ 
+                borderRadius: 3,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                background: 'rgba(255,255,255,0.95)',
+                backdropFilter: 'blur(10px)',
+                overflow: 'hidden'
+              }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'rgba(102, 126, 234, 0.08)' }}>
+                    <TableCell sx={{ fontWeight: 700, color: '#667eea' }}>ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#667eea' }}>Título</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#667eea' }}>Autor</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#667eea' }}>Año</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#667eea' }}>Género</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, color: '#667eea' }}>
+                      Acciones
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+                </TableHead>
+                <TableBody>
+                  {books.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                        <BookIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+                        <Typography variant="h6" color="text.secondary">
+                          No hay libros registrados
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          Comienza agregando tu primer libro
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    books.map((book) => (
+                      <TableRow 
+                        key={book.id} 
+                        hover
+                        sx={{
+                          '&:hover': {
+                            bgcolor: 'rgba(102, 126, 234, 0.04)',
+                            transition: 'all 0.2s ease'
+                          }
+                        }}
+                      >
+                        <TableCell>
+                          <Chip 
+                            label={`#${book.id}`} 
+                            size="small" 
+                            sx={{ 
+                              fontWeight: 600,
+                              bgcolor: 'rgba(102, 126, 234, 0.1)',
+                              color: '#667eea'
+                            }} 
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            onClick={() => handleViewDetails(book.id)}
+                            sx={{ 
+                              textTransform: 'none', 
+                              textAlign: 'left',
+                              fontWeight: 600,
+                              color: '#667eea',
+                              '&:hover': {
+                                bgcolor: 'rgba(102, 126, 234, 0.08)'
+                              }
+                            }}
+                          >
+                            {book.title}
+                          </Button>
+                        </TableCell>
+                        <TableCell sx={{ color: 'text.secondary' }}>
+                          {book.author}
+                        </TableCell>
+                        <TableCell>
+                          {book.year ? (
+                            <Chip 
+                              label={book.year} 
+                              size="small" 
+                              variant="outlined"
+                              sx={{ borderColor: '#667eea', color: '#667eea' }}
+                            />
+                          ) : (
+                            <Typography variant="body2" color="text.disabled">-</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {book.genre ? (
+                            <Chip 
+                              label={book.genre} 
+                              size="small"
+                              sx={{ 
+                                bgcolor: 'rgba(118, 75, 162, 0.1)',
+                                color: '#764ba2',
+                                fontWeight: 500
+                              }}
+                            />
+                          ) : (
+                            <Typography variant="body2" color="text.disabled">-</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Tooltip title="Ver detalles">
+                            <IconButton
+                              onClick={() => handleViewDetails(book.id)}
+                              sx={{ 
+                                color: '#667eea',
+                                '&:hover': { bgcolor: 'rgba(102, 126, 234, 0.1)' }
+                              }}
+                            >
+                              <VisibilityIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Editar">
+                            <IconButton
+                              onClick={() => handleOpenDialog(book)}
+                              sx={{ 
+                                color: '#764ba2',
+                                '&:hover': { bgcolor: 'rgba(118, 75, 162, 0.1)' }
+                              }}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Eliminar">
+                            <IconButton
+                              onClick={() => handleOpenDeleteDialog(book)}
+                              sx={{ 
+                                color: '#f44336',
+                                '&:hover': { bgcolor: 'rgba(244, 67, 54, 0.1)' }
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Fade>
+        )}
+      </Container>
 
       {/* Dialog para crear/editar */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {currentBook ? 'Editar Libro' : 'Nuevo Libro'}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog}
+        TransitionComponent={Transition}
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BookIcon />
+            <span>{currentBook ? 'Editar Libro' : 'Nuevo Libro'}</span>
+          </Box>
+          <IconButton onClick={handleCloseDialog} sx={{ color: 'white' }}>
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Divider />
+        <DialogContent sx={{ mt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <TextField
-              label="Título"
+              label="Título del libro"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
               required
               fullWidth
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea',
+                }
+              }}
             />
             <TextField
               label="Autor"
@@ -281,72 +496,240 @@ function App() {
               onChange={handleInputChange}
               required
               fullWidth
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea',
+                }
+              }}
             />
             <TextField
-              label="Año"
+              label="Año de publicación"
               name="year"
               type="number"
               value={formData.year}
               onChange={handleInputChange}
               fullWidth
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea',
+                }
+              }}
             />
             <TextField
-              label="Género"
+              label="Género literario"
               name="genre"
               value={formData.genre}
               onChange={handleInputChange}
               fullWidth
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#667eea',
+                }
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleCloseDialog}
+            sx={{ 
+              color: '#666',
+              textTransform: 'none',
+              fontWeight: 600
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              boxShadow: '0 4px 14px rgba(102, 126, 234, 0.4)',
+              '&:hover': {
+                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
+              }
+            }}
+          >
             {currentBook ? 'Actualizar' : 'Crear'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog para ver detalles */}
-      <Dialog open={openDetailsDialog} onClose={handleCloseDetailsDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Detalles del Libro</DialogTitle>
-        <DialogContent>
+      <Dialog 
+        open={openDetailsDialog} 
+        onClose={handleCloseDetailsDialog}
+        TransitionComponent={Transition}
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BookIcon />
+            <span>Detalles del Libro</span>
+          </Box>
+          <IconButton onClick={handleCloseDetailsDialog} sx={{ color: 'white' }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ mt: 3 }}>
           {selectedBook && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body1" gutterBottom>
-                <strong>ID:</strong> {selectedBook.id}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Título:</strong> {selectedBook.title}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Autor:</strong> {selectedBook.author}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Año:</strong> {selectedBook.year || 'No especificado'}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                <strong>Género:</strong> {selectedBook.genre || 'No especificado'}
-              </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  ID
+                </Typography>
+                <Typography variant="h6" fontWeight={600} color="#667eea">
+                  #{selectedBook.id}
+                </Typography>
+              </Box>
+              <Divider />
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  TÍTULO
+                </Typography>
+                <Typography variant="h5" fontWeight={700} sx={{ mt: 0.5 }}>
+                  {selectedBook.title}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  AUTOR
+                </Typography>
+                <Typography variant="body1" sx={{ mt: 0.5 }}>
+                  {selectedBook.author}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 3 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    AÑO
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                    {selectedBook.year || 'No especificado'}
+                  </Typography>
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    GÉNERO
+                  </Typography>
+                  <Typography variant="body1" sx={{ mt: 0.5 }}>
+                    {selectedBook.genre || 'No especificado'}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDetailsDialog}>Cerrar</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleCloseDetailsDialog}
+            variant="contained"
+            fullWidth
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
+              py: 1.2,
+              boxShadow: '0 4px 14px rgba(102, 126, 234, 0.4)',
+            }}
+          >
+            Cerrar
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog de confirmación para eliminar */}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>
+      <Dialog 
+        open={openDeleteDialog} 
+        onClose={handleCloseDeleteDialog}
+        TransitionComponent={Transition}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          color: '#f44336',
+          fontWeight: 600
+        }}>
+          <DeleteIcon />
+          Confirmar Eliminación
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ mt: 2 }}>
           <Typography>
-            ¿Está seguro de que desea eliminar el libro "{selectedBook?.title}"?
+            ¿Está seguro de que desea eliminar el libro{' '}
+            <strong>"{selectedBook?.title}"</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
-          <Button onClick={handleDelete} variant="contained" color="error">
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleCloseDeleteDialog}
+            sx={{ 
+              textTransform: 'none',
+              fontWeight: 600,
+              color: '#666'
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleDelete} 
+            variant="contained"
+            sx={{
+              bgcolor: '#f44336',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+              '&:hover': {
+                bgcolor: '#d32f2f',
+              }
+            }}
+          >
             Eliminar
           </Button>
         </DialogActions>
@@ -359,11 +742,20 @@ function App() {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          sx={{ 
+            width: '100%',
+            borderRadius: 2,
+            boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+            fontWeight: 500
+          }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 }
 
